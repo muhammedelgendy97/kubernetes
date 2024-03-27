@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-db
+  labels:
+    app: vprodb
+spec:
+  selector:
+    matchLabels:
+      app: vprodb
+  replicas: 1    
+  template:
+    metadata:
+      labels:
+        app: vprodb
+    spec:
+      containers:
+        - name: vprodb
+          image: mohamedelgendy/vprofiledb:latest
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: vprodb
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASS
+              valueFrom:
+                secretKeyRef:
+                  key: db-pass
+                  name: secret-app-k8s
+      nodeSelector:
+        zone: us-east-1a
+      volumes:
+        - name: vprodb-volume
+          awsElasticBlockStore:
+            volumeID: vol-03fa46f264f016643
+            fsType: ext4
+      initContainers:
+         - name: busybox
+           image: busybox:latest
+           args: ["rm","-rf","/var/lib/mysql/lost+found"]
+           volumeMounts:
+             - mountPath: /var/lib/mysql
+               name: vprodb-volume
