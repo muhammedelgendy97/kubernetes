@@ -19,7 +19,7 @@ spec:
           image: mohamedelgendy/vprofiledb:latest
           volumeMounts:
             - mountPath: /var/lib/mysql
-              name: vprodb
+              name: vprodb-volume
           ports:
             - containerPort: 3306
           env:
